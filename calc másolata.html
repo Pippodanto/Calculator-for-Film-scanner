@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Size Calculator - DPX & ProRes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-image: url("FocusfoxLogoWithoutBackgroundYellow.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+
+        
+    .container {
+    max-width: 1000px;
+    margin: 0 auto;
+
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(255, 255, 255, 0.95);
+    overflow: hidden;
+}
+        
+        header {
+            background: linear-gradient(135deg, #DAB74E 0%, #000000 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .calculator-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #aeecef;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #80ded9;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select, input {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        input[type="number"] {
+            font-size: 14px;
+        }
+        
+        .results {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0f0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #856404;
+            margin-bottom: 20px;
+        }
+        
+        .bitrate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        
+        .bitrate-table th {
+            background: #f0f0f5;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .bitrate-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .bitrate-table tr:hover {
+            background: #f9f9fb;
+        }
+        
+        .formula-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #333;
+            overflow-x: auto;
+        }
+        
+        .formula-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fffec8;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 File Size Calculator</h1>
+            <p>DPX & ProRes Bitrate & Size Estimation for Scanning</p>
+        </header>
+        
+        <div class="content">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab(event,'calculator')">Calculator</button>
+                <button class="tab-btn" onclick="switchTab(event,'reference')">Reference & Formulas</button>
+
+            </div>
+            
+            <!-- CALCULATOR TAB -->
+            <div id="calculator" class="tab-content active">
+                <div class="calculator-section">
+                    
+<div class="calculator-section" style="margin-bottom: 20px;">
+  <div class="section-title">Film types → Frames</div>
+
+  <div class="input-grid">
+    <div class="input-group">
+      <label for="film-type">Film Type</label>
+      <select id="film-type" onchange="onFilmTypeChange(); calculateFramesFromFilm(); calculateDPX();">
+        <option value="8mm">8mm</option>
+        <option value="16mm">16mm</option>
+        <option value="35mm" selected>35mm</option>
+      </select>
+    </div>
+
+    <div class="input-group" id="perfo-group">
+      <label for="film-perfo">Perforation (35mm)</label>
+      <select id="film-perfo" onchange="calculateFramesFromFilm(); calculateDPX();">
+        <option value="2" selected>2-perf</option>
+        <option value="3">3-perf</option>
+        <option value="4">4-perf</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label for="film-length-m">Length (m)</label>
+      <input type="number" id="film-length-m" value="1" step="0.01"
+             onchange="calculateFramesFromFilm(); calculateDPX();" oninput="calculateFramesFromFilm(); calculateDPX();">
+    </div>
+  </div>
+</div>
+
+<div class="section-title">DPX Calculator</div>
+                    
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="dpx-bitdepth">Bit Depth</label>
+                            <select id="dpx-format" onchange="calculateDPX()">
+    <option value="10-3">10-bit RGB</option>
+    <option value="10-4">10-bit RGB + Alpha</option>
+    <option value="16-3">16-bit RGB</option>
+    <option value="16-4">16-bit RGB + Alpha</option>
+</select>
+                        </div>
+                        <div class="input-group">
+                            <label for="dpx-width">Width (px)</label>
+                            <input type="number" id="dpx-width" value="1920" onchange="calculateDPX()" oninput="calculateDPX()">
+                        </div>
+                        <div class="input-group">
+                            <label for="dpx-height">Height (px)</label>
+                            <input type="number" id="dpx-height" value="1080" onchange="calculateDPX()" oninput="calculateDPX()">
+                        </div>
+                        <div class="input-group">
+                            <label for="dpx-frames">Frame Count</label>
+                            <input type="number" id="dpx-frames" value="100" onchange="calculateDPX()" oninput="calculateDPX()">
+                        </div>
+<div class="input-group">
+  <label>Overhead Preset</label>
+  <select id="dpx-overhead-preset" onchange="
+    document.getElementById('dpx-overhead').value = this.value;
+    calculateDPX();
+  ">
+    <option value="8192" selected>Scanner (8192)</option>
+    <option value="1664">Minimal DPX (1664)</option>
+    <option value="0">None (0)</option>
+  </select>
+</div>
+<div class="input-group">
+  <label for="dpx-overhead">DPX Overhead (bytes)</label>
+  <input type="number" id="dpx-overhead" value="8192" readonly>
+</div>
+
+                    </div>
+                    
+                    <div class="results">
+                        <div class="result-item">
+                            <span class="result-label">Estimated File Size (MB)</span>
+                            <span class="result-value" id="dpx-result">6,220.59 MB</span>
+                        </div>
+<div class="result-item">
+  <span class="result-label">Estimated File Size (TB)</span>
+  <span class="result-value" id="dpx-result-tb">0.00 TB</span>
+</div>
+
+                    </div>
+                </div>
+                
+                <div class="calculator-section">
+                    <div class="section-title">ProRes Calculator</div>
+                    
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="prores-type">ProRes Type</label>
+                            <select id="prores-type" onchange="calculateProRes()">
+                                <option value="45">ProRes 422 Proxy </option>
+                                <option value="102">ProRes 422 LT </option>
+                                <option value="147">ProRes 422 </option>
+                                <option value="220">ProRes 422 HQ </option>
+                                <option value="330">ProRes 4444 </option>
+                                <option value="550">ProRes 4444 XQ </option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="prores-width">Width (px)</label>
+                            <input type="number" id="prores-width" value="1920" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label for="prores-height">Height (px)</label>
+                            <input type="number" id="prores-height" value="1080" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label for="prores-frames">Frame Count</label>
+                            <input type="number" id="prores-frames" value="100" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="results">
+                        <div class="result-item">
+                            <span class="result-label">Estimated File Size (MB)</span>
+                            <span class="result-value" id="prores-result">612.08 MB</span>
+                        </div>
+
+<div class="result-item">
+  <span class="result-label">Estimated File Size (TB)</span>
+  <span class="result-value" id="prores-result-tb">0.00 TB</span>
+</div>
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- REFERENCE TAB -->
+            <div id="reference" class="tab-content">
+                <div class="calculator-section">
+                    <div class="section-title">ProRes Bitrate Reference</div>
+                    
+                    <table class="bitrate-table">
+                        <thead>
+                            <tr>
+                                <th>Codec</th>
+                                <th>Bitrate (Mbps)</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ProRes 422 Proxy</strong></td>
+                                <td>45 Mbps</td>
+                                <td>Very low data rate, editing proxy</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ProRes 422 LT</strong></td>
+                                <td>102 Mbps</td>
+                                <td>Lightweight, lower data rate</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ProRes 422</strong></td>
+                                <td>147 Mbps</td>
+                                <td>Standard, good quality</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ProRes 422 HQ</strong></td>
+                                <td>220 Mbps</td>
+                                <td>High quality, delivery grade</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ProRes 4444</strong></td>
+                                <td>330 Mbps</td>
+                                <td>Highest quality, includes alpha channel</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="calculator-section">
+                    <div class="section-title">Calculation Formulas</div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: #667eea; margin-bottom: 12px; font-size: 14px; font-weight: 600;">DPX Calculation</h3>
+                        <div class="formula-box">
+                            <div class="formula-title">Formula:</div>
+                            Size = Frames × (Overhead + Width × Height × BytesPerPixel)
+                        </div>
+                        <div class="formula-box">
+                            <div class="formula-title">Example:</div>
+                            1920×1080 10-bit DPX × 100 frames<br>
+                            = (1920 × 1080 × 10 × 3) × 100 / 8 / 1024 / 1024<br>
+                            = 6,220.59 MB
+                        </div>
+                        <div class="info-box">
+                            💡 DPX is uncompressed RGB (3 channels). The formula accounts for bit depth and converts bits to bytes to MB.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 12px; font-size: 14px; font-weight: 600;">ProRes Calculation</h3>
+                        <div class="formula-box">
+                            <div class="formula-title">Formula:</div>
+                            Size (MB) = (Bitrate_Mbps × Frame_Count / 24) × 1000 / 8 / 1024
+                        </div>
+                        <div class="formula-box">
+                            <div class="formula-title">Example:</div>
+                            ProRes 422 HQ (220 Mbps) × 100 frames<br>
+                            = (220 × 100 / 24) × 1000 / 8 / 1024<br>
+                            = 1,117.34 MB
+                        </div>
+                        <div class="info-box">
+                            💡 ProRes uses fixed bitrate compression. The calculation normalizes to 24fps standard playback speed. Bitrate remains constant regardless of resolution (for the same codec).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+function onFilmTypeChange() {
+  const filmType = document.getElementById('film-type').value;
+  const perfoGroup = document.getElementById('perfo-group');
+  perfoGroup.style.display = (filmType === '35mm') ? 'flex' : 'none';
+}
+
+function calculateFramesFromFilm() {
+  const filmType = document.getElementById('film-type').value;
+  const perfo = parseInt(document.getElementById('film-perfo')?.value) || 0;
+  const lengthM = parseFloat(document.getElementById('film-length-m').value) || 0;
+
+  let framesPerMeter = 0;
+  if (filmType === '8mm') framesPerMeter = 236.2;
+  if (filmType === '16mm') framesPerMeter = 1131.2;
+  if (filmType === '35mm') {
+    if (perfo === 2) framesPerMeter = 105;
+    if (perfo === 3) framesPerMeter = 70;
+    if (perfo === 4) framesPerMeter = 52.5;
+  }
+
+  const frames = Math.round(lengthM * framesPerMeter);
+  document.getElementById('dpx-frames').value = frames; // <-- DPX mezőbe írjuk
+  return frames;
+}
+
+function calculateDPX() {
+  const format = document.getElementById('dpx-format').value;
+  const [bitDepth, channels] = format.split('-').map(Number);
+
+  const width  = parseInt(document.getElementById('dpx-width').value)  || 0;
+  const height = parseInt(document.getElementById('dpx-height').value) || 0;
+  const frames = parseInt(document.getElementById('dpx-frames').value) || 0;
+
+  // 8 KB image data offset per frame (scanner profile default)
+  const dpxOverhead = parseInt(document.getElementById('dpx-overhead')?.value) || 0;
+
+  // Determine real storage bytes per pixel (scanner-accurate assumptions)
+  let bytesPerPixel = 0;
+
+  // 10-bit DPX RGB is typically stored in 32-bit words => 4 B/px for RGB
+  if (bitDepth === 10) {
+    if (channels === 3) bytesPerPixel = 4;
+    else if (channels === 4) bytesPerPixel = 16 / 3; // rare; keep for completeness
+  }
+
+  // 16-bit per channel
+  if (bitDepth === 16) {
+    bytesPerPixel = channels * 2; // RGB=6, RGBA=8
+  }
+
+  const frameBytes = (width * height * bytesPerPixel) + dpxOverhead;
+  const totalBytes = frameBytes * frames;
+  const sizeMB = totalBytes / 1024 / 1024;
+
+  document.getElementById('dpx-result').textContent =
+    sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
+
+const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
+
+document.getElementById('dpx-result-tb').textContent =
+  sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
+calculateProRes();
+}
+
+        
+        function calculateProRes() {
+            const bitrateMbps = parseInt(document.getElementById('prores-type').value);
+            const width  = parseInt(document.getElementById('dpx-width').value)  || 0;
+const height = parseInt(document.getElementById('dpx-height').value) || 0;
+const frames = parseInt(document.getElementById('dpx-frames').value)  || 0;
+
+// Mirror into ProRes fields (read-only display)
+const pw = document.getElementById('prores-width');
+const ph = document.getElementById('prores-height');
+const pf = document.getElementById('prores-frames');
+if (pw) pw.value = width;
+if (ph) ph.value = height;
+if (pf) pf.value = frames;
+
+            
+            // ProRes: Size (MB) = (Bitrate_Mbps × Frame_Count / 24) × 1000 / 8 / 1024
+            const sizeMB = (bitrateMbps * frames / 24) * 1000 / 8 / 1024;
+            
+            const resultElement = document.getElementById('prores-result');
+            resultElement.textContent = sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
+
+const totalBytes = (bitrateMbps * 1_000_000 / 8) * (frames / 24); // bytes
+const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
+
+document.getElementById('prores-result-tb').textContent =
+  sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
+        }
+        
+                    function switchTab(e, tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  // Show selected tab
+  document.getElementById(tabName).classList.add('active');
+  e.target.classList.add('active');
+}
+        
+        // Initial calculations
+        onFilmTypeChange();
+calculateFramesFromFilm();
+calculateDPX();
+calculateProRes();
+
+    </script>
+</body>
+</html>
