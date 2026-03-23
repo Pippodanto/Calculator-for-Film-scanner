@@ -228,6 +228,33 @@ body {
         .tab-content.active {
             display: block;
         }
+.app-footer {
+  margin: 40px auto 0 auto;
+  max-width: 1000px;
+  padding: 16px 20px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.25);
+  text-align: center;
+  font-size: 12px;
+  color: #fff;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  letter-spacing: 0.5px;
+}
+
+.footer-version {
+  opacity: 0.6;
+}
     </style>
 </head>
 <body>
@@ -348,6 +375,14 @@ body {
                                 <option value="550">ProRes 4444 XQ </option>
                             </select>
                         </div>
+<div class="input-group">
+  <label for="prores-fps">Playback FPS</label>
+  <select id="prores-fps" onchange="calculateProRes()">
+     <option value="24" selected>24</option>
+    <option value="25">25</option>
+        <option value="30">30</option>
+     </select>
+</div>
                         <div class="input-group">
                             <label for="prores-width">Width (px)</label>
                             <input type="number" id="prores-width" value="1920" readonly>
@@ -461,10 +496,15 @@ body {
         </div>
     </div>
 
-    <footer style="text-align:center; padding:22px; font-size:20px; color:#444;">
-        © 2026 — DPX/ProRes Calculator by Petya • v1.0
-    </footer>
-    
+    <footer class="app-footer">
+  <div class="footer-content">
+    <span>© 2026 </span>
+    <span>DPX / ProRes Calculator</span>
+    <span>Created by Peter Molnar</span>
+    <span class="footer-version">v1.0</span>
+  </div>
+</footer>
+
     <script>
 function onFilmTypeChange() {
   const filmType = document.getElementById('film-type').value;
@@ -532,45 +572,44 @@ calculateProRes();
 
         
         function calculateProRes() {
-            const bitrateMbps = parseInt(document.getElementById('prores-type').value);
-            const width  = parseInt(document.getElementById('dpx-width').value)  || 0;
-const height = parseInt(document.getElementById('dpx-height').value) || 0;
-const frames = parseInt(document.getElementById('dpx-frames').value)  || 0;
+  const bitrateMbps = parseInt(document.getElementById('prores-type').value) || 0;
 
-// Mirror into ProRes fields (read-only display)
-const pw = document.getElementById('prores-width');
-const ph = document.getElementById('prores-height');
-const pf = document.getElementById('prores-frames');
-if (pw) pw.value = width;
-if (ph) ph.value = height;
-if (pf) pf.value = frames;
+  // Pull resolution + frames from DPX section
+  const width  = parseInt(document.getElementById('dpx-width').value)  || 0;
+  const height = parseInt(document.getElementById('dpx-height').value) || 0;
+  const frames = parseInt(document.getElementById('dpx-frames').value)  || 0;
 
-            
-            // ProRes: Size (MB) = (Bitrate_Mbps × Frame_Count / 24) × 1000 / 8 / 1024
-            const sizeMB = (bitrateMbps * frames / 24) * 1000 / 8 / 1024;
-            
-            const resultElement = document.getElementById('prores-result');
-            resultElement.textContent = sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
+  // Playback FPS selector (new)
+  const fps = parseFloat(document.getElementById('prores-fps')?.value) || 24;
 
-const totalBytes = (bitrateMbps * 1_000_000 / 8) * (frames / 24); // bytes
-const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
+  // Mirror into ProRes fields (read-only display)
+  const pw = document.getElementById('prores-width');
+  const ph = document.getElementById('prores-height');
+  const pf = document.getElementById('prores-frames');
+  if (pw) pw.value = width;
+  if (ph) ph.value = height;
+  if (pf) pf.value = frames;
 
-document.getElementById('prores-result-tb').textContent =
-  sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
-        }
-        
-                    function switchTab(e, tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove('active');
-  });
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
+  // Guard
+  if (bitrateMbps <= 0 || fps <= 0 || frames <= 0) {
+    document.getElementById('prores-result').textContent = '0.00 MB';
+    const tbEl = document.getElementById('prores-result-tb');
+    if (tbEl) tbEl.textContent = '0.0000 TB';
+    return;
+  }
 
-  // Show selected tab
-  document.getElementById(tabName).classList.add('active');
-  e.target.classList.add('active');
+  // duration_seconds = frames / fps
+  const totalBytes = (bitrateMbps * 1_000_000 / 8) * (frames / fps);
+  const sizeMB = totalBytes / 1024 / 1024;
+  const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
+
+  document.getElementById('prores-result').textContent =
+    sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
+
+  const tbEl = document.getElementById('prores-result-tb');
+  if (tbEl) {
+    tbEl.textContent = sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
+  }
 }
         
         // Initial calculations
@@ -582,4 +621,3 @@ calculateProRes();
     </script>
 </body>
 </html>
-
