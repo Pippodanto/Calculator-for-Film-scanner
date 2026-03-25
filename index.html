@@ -398,9 +398,9 @@
               <span class="result-value" id="prores-target-bitrate">0 Mb/s</span>
             </div>
             <div class="result-item">
-              <span class="result-label">Playback Duration</span>
-              <span class="result-value" id="prores-duration">0.00 s</span>
-            </div>
+    <span class="result-label">Playback Duration</span>
+    <span class="result-value" id="prores-duration">-</span>
+</div>
           </div>
         </div>
       </div>
@@ -658,9 +658,21 @@
       }
 
       const durationSeconds = frames / fps;
-      const totalBytes = (bitrateMbps * 1_000_000 / 8) * durationSeconds;
-      const lowBytes = totalBytes * 0.9;
-      const highBytes = totalBytes * 1.1;
+const totalBytes = (bitrateMbps * 1_000_000 / 8) * durationSeconds;
+const lowBytes = totalBytes * 0.9;
+const highBytes = totalBytes * 1.1;
+
+const hours = Math.floor(durationSeconds / 3600);
+const minutes = Math.floor((durationSeconds % 3600) / 60);
+const seconds = Math.floor(durationSeconds % 60);
+
+let durationText = '';
+
+if (hours > 0) {
+  durationText = `${hours}h ${minutes}m`;
+} else {
+  durationText = `${minutes}m ${seconds}s`;
+}
 
       const sizeMB = totalBytes / 1024 / 1024;
       const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
@@ -687,8 +699,8 @@
           (exactMatch ? ' (Apple table)' : ' (scaled estimate)');
       }
       if (durationEl) {
-        durationEl.textContent = durationSeconds.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' s';
-      }
+  durationEl.textContent = durationText;
+}
     }
 
     onFilmTypeChange();
