@@ -93,6 +93,11 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
+    input[readonly] {
+      background: #f4f4f8;
+      color: #555;
+    }
+
     .results {
       background: #f8f9ff;
       border-left: 4px solid #667eea;
@@ -134,6 +139,7 @@
       font-size: 13px;
       color: #856404;
       margin-bottom: 20px;
+      line-height: 1.5;
     }
 
     .bitrate-table {
@@ -253,12 +259,12 @@
       </div>
 
       <div id="calculator" class="tab-content active">
-        <div class="calculator-section" style="margin-bottom: 20px;">
-          <div class="section-title">Film types → Frames</div>
+        <div class="calculator-section">
+          <div class="section-title">Film Type</div>
           <div class="input-grid">
             <div class="input-group">
               <label for="film-type">Film Type</label>
-              <select id="film-type" onchange="onFilmTypeChange(); calculateFramesFromFilm(); calculateDPX();">
+              <select id="film-type" onchange="onFilmTypeChange(); calculateFramesFromFilm(); calculateAll();">
                 <option value="8mm">8mm</option>
                 <option value="16mm">16mm</option>
                 <option value="35mm" selected>35mm</option>
@@ -267,7 +273,7 @@
 
             <div class="input-group" id="perfo-group">
               <label for="film-perfo">Perforation (35mm)</label>
-              <select id="film-perfo" onchange="calculateFramesFromFilm(); calculateDPX();">
+              <select id="film-perfo" onchange="calculateFramesFromFilm(); calculateAll();">
                 <option value="2" selected>2-perf</option>
                 <option value="3">3-perf</option>
                 <option value="4">4-perf</option>
@@ -275,17 +281,51 @@
             </div>
 
             <div class="input-group">
-              <label for="film-length-m">Length (m)</label>
+              <label for="film-length-m">Film Length (m)</label>
               <input type="number" id="film-length-m" value="1" step="0.01"
-                onchange="calculateFramesFromFilm(); calculateDPX();"
-                oninput="calculateFramesFromFilm(); calculateDPX();">
+                onchange="calculateFramesFromFilm(); calculateAll();"
+                oninput="calculateFramesFromFilm(); calculateAll();">
+            </div>
+
+            <div class="input-group">
+              <label for="dpx-frames">Frame No</label>
+              <input type="number" id="dpx-frames" value="105"
+                onchange="calculateAll()" oninput="calculateAll()">
+            </div>
+          </div>
+        </div>
+
+        <div class="calculator-section">
+          <div class="section-title">Scanning Format</div>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="scan-format">Resolution</label>
+              <select id="scan-format" onchange="onScanFormatChange(); calculateAll();">
+                <option value="1920x1080">HD 1920×1080</option>
+                <option value="2048x858">2K 2048×858</option>
+                <option value="2048x1152">2K 2048×1152</option>
+                <option value="2048x1556">2K 2048×1556</option>
+                <option value="4096x1716">4K 4096×1716</option>
+                <option value="4096x2160">4K 4096×2160</option>
+                <option value="4096x3112" selected>4K 4096×3112</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="dpx-width">Width (px)</label>
+              <input type="number" id="dpx-width" value="4096" readonly onchange="calculateAll()" oninput="calculateAll()">
+            </div>
+
+            <div class="input-group">
+              <label for="dpx-height">Height (px)</label>
+              <input type="number" id="dpx-height" value="3112" readonly onchange="calculateAll()" oninput="calculateAll()">
             </div>
           </div>
         </div>
 
         <div class="calculator-section">
           <div class="section-title">DPX Calculator</div>
-
           <div class="input-grid">
             <div class="input-group">
               <label for="dpx-format">Bit Depth</label>
@@ -293,28 +333,13 @@
                 <option value="10-3">10-bit RGB</option>
                 <option value="10-4">10-bit RGB + Alpha</option>
                 <option value="16-3">16-bit RGB</option>
-                <option value="16-4">16-bit RGB + Alpha</option>
+                <option value="16-4" selected>16-bit RGB + Alpha</option>
               </select>
             </div>
 
             <div class="input-group">
-              <label for="dpx-width">Width (px)</label>
-              <input type="number" id="dpx-width" value="1920" onchange="calculateDPX()" oninput="calculateDPX()">
-            </div>
-
-            <div class="input-group">
-              <label for="dpx-height">Height (px)</label>
-              <input type="number" id="dpx-height" value="1080" onchange="calculateDPX()" oninput="calculateDPX()">
-            </div>
-
-            <div class="input-group">
-              <label for="dpx-frames">Frame Count</label>
-              <input type="number" id="dpx-frames" value="100" onchange="calculateDPX()" oninput="calculateDPX()">
-            </div>
-
-            <div class="input-group">
               <label for="dpx-overhead-preset">Overhead Preset</label>
-              <select id="dpx-overhead-preset" onchange="document.getElementById('dpx-overhead').value = this.value; calculateDPX();">
+              <select id="dpx-overhead-preset" onchange="setOverheadPreset(); calculateDPX();">
                 <option value="8192" selected>Scanner (8192)</option>
                 <option value="1664">Minimal DPX (1664)</option>
                 <option value="0">None (0)</option>
@@ -341,7 +366,6 @@
 
         <div class="calculator-section">
           <div class="section-title">ProRes Calculator</div>
-
           <div class="input-grid">
             <div class="input-group">
               <label for="prores-type">ProRes Type</label>
@@ -363,21 +387,6 @@
                 <option value="30">30</option>
               </select>
             </div>
-
-            <div class="input-group">
-              <label for="prores-width">Width (px)</label>
-              <input type="number" id="prores-width" value="1920" readonly>
-            </div>
-
-            <div class="input-group">
-              <label for="prores-height">Height (px)</label>
-              <input type="number" id="prores-height" value="1080" readonly>
-            </div>
-
-            <div class="input-group">
-              <label for="prores-frames">Frame Count</label>
-              <input type="number" id="prores-frames" value="100" readonly>
-            </div>
           </div>
 
           <div class="results">
@@ -398,9 +407,9 @@
               <span class="result-value" id="prores-target-bitrate">0 Mb/s</span>
             </div>
             <div class="result-item">
-    <span class="result-label">Playback Duration</span>
-    <span class="result-value" id="prores-duration">-</span>
-</div>
+              <span class="result-label">Playback Duration</span>
+              <span class="result-value" id="prores-duration">-</span>
+            </div>
           </div>
         </div>
       </div>
@@ -408,7 +417,6 @@
       <div id="reference" class="tab-content">
         <div class="calculator-section">
           <div class="section-title">ProRes Bitrate Reference</div>
-
           <table class="bitrate-table">
             <thead>
               <tr>
@@ -456,6 +464,17 @@
           <div class="section-title">Calculation Formulas</div>
 
           <div style="margin-bottom: 30px;">
+            <h3 style="color: #667eea; margin-bottom: 12px; font-size: 14px; font-weight: 600;">Film Frames</h3>
+            <div class="formula-box">
+              <div class="formula-title">Formula:</div>
+              Frame_Count = Film_Length_Meters × Frames_Per_Meter
+            </div>
+            <div class="info-box">
+              Reference values used: 8mm = 236.2 frames/m, 16mm = 131.2 frames/m, 35mm 1-perf = 210 frames/m, 2-perf = 105 frames/m, 3-perf = 70 frames/m, 4-perf = 52.5 frames/m.
+            </div>
+          </div>
+
+          <div style="margin-bottom: 30px;">
             <h3 style="color: #667eea; margin-bottom: 12px; font-size: 14px; font-weight: 600;">DPX Calculation</h3>
             <div class="formula-box">
               <div class="formula-title">Formula:</div>
@@ -463,11 +482,11 @@
             </div>
             <div class="formula-box">
               <div class="formula-title">Example:</div>
-              1920×1080 16-bit RGBA DPX × 100 frames, 8192-byte overhead<br>
+              4096×3112 16-bit RGBA DPX × 105 frames, 8192-byte overhead<br>
               Bytes per pixel = 8<br>
-              Frame size = (1920 × 1080 × 8) + 8192 = 16,596,992 bytes<br>
-              Total size = 16,596,992 × 100 = 1,659,699,200 bytes<br>
-              = 1,582.81 MB
+              Frame size = (4096 × 3112 × 8) + 8192 = 101,982,208 bytes<br>
+              Total size = 101,982,208 × 105 = 10,708,131,840 bytes<br>
+              = 10,211.12 MB
             </div>
             <div class="info-box">
               DPX uses deterministic frame size estimation here. For your scanner profile, 16-bit RGBA DPX matches measured files with an 8192-byte per-frame overhead.
@@ -498,54 +517,39 @@
 
   <footer class="app-footer">
     <div class="footer-content">
-      <span>© 2026 FocusFox</span>
+      <span>© 2026 </span>
       <span>DPX / ProRes Calculator</span>
       <span>Created by Peter Molnar</span>
-      <span class="footer-version">v1.0</span>
+      <span class="footer-version">v1.2</span>
     </div>
   </footer>
 
   <script>
+    const SCAN_FORMATS = {
+      '1920x1080': { width: 1920, height: 1080 },
+      '2048x858': { width: 2048, height: 858 },
+      '2048x1152': { width: 2048, height: 1152 },
+      '2048x1556': { width: 2048, height: 1556 },
+      '4096x1716': { width: 4096, height: 1716 },
+      '4096x2160': { width: 4096, height: 2160 },
+      '4096x3112': { width: 4096, height: 3112 }
+    };
+
     const PRORES_TARGETS = {
-      "1920x1080": {
+      '1920x1080': {
         24: { proxy: 36, lt: 82, p422: 117, hq: 176, p4444: 264, xq: 396 },
         25: { proxy: 38, lt: 85, p422: 122, hq: 184, p4444: 275, xq: 413 },
         30: { proxy: 45, lt: 102, p422: 147, hq: 220, p4444: 330, xq: 495 }
       },
-      "2048x1080": {
-        24: { proxy: 41, lt: 93, p422: 134, hq: 201, p4444: 302, xq: 453 },
-        25: { proxy: 43, lt: 97, p422: 140, hq: 210, p4444: 315, xq: 472 },
-        30: { proxy: 52, lt: 116, p422: 168, hq: 251, p4444: 377, xq: 566 }
-      },
-      "2048x1556": {
+      '2048x1556': {
         24: { proxy: 56, lt: 126, p422: 181, hq: 272, p4444: 407, xq: 611 },
         25: { proxy: 58, lt: 131, p422: 189, hq: 283, p4444: 425, xq: 637 },
         30: { proxy: 70, lt: 157, p422: 226, hq: 340, p4444: 509, xq: 764 }
       },
-      "3840x2160": {
-        24: { proxy: 145, lt: 328, p422: 471, hq: 707, p4444: 1061, xq: 1591 },
-        25: { proxy: 151, lt: 342, p422: 492, hq: 737, p4444: 1106, xq: 1659 },
-        30: { proxy: 182, lt: 410, p422: 589, hq: 884, p4444: 1326, xq: 1989 }
-      },
-      "4096x2160": {
+      '4096x2160': {
         24: { proxy: 155, lt: 350, p422: 503, hq: 754, p4444: 1131, xq: 1697 },
         25: { proxy: 162, lt: 365, p422: 524, hq: 786, p4444: 1180, xq: 1769 },
         30: { proxy: 194, lt: 437, p422: 629, hq: 943, p4444: 1414, xq: 2121 }
-      },
-      "5120x2700": {
-        24: { proxy: 243, lt: 547, p422: 786, hq: 1178, p4444: 1768, xq: 2652 },
-        25: { proxy: 253, lt: 570, p422: 819, hq: 1229, p4444: 1843, xq: 2765 },
-        30: { proxy: 304, lt: 684, p422: 982, hq: 1473, p4444: 2210, xq: 3314 }
-      },
-      "6144x3240": {
-        24: { proxy: 350, lt: 788, p422: 1131, hq: 1697, p4444: 2545, xq: 3818 },
-        25: { proxy: 365, lt: 821, p422: 1180, hq: 1769, p4444: 2654, xq: 3981 },
-        30: { proxy: 437, lt: 985, p422: 1414, hq: 2121, p4444: 3182, xq: 4772 }
-      },
-      "8192x4320": {
-        24: { proxy: 622, lt: 1400, p422: 2011, hq: 3017, p4444: 4525, xq: 6788 },
-        25: { proxy: 649, lt: 1460, p422: 2097, hq: 3146, p4444: 4719, xq: 7078 },
-        30: { proxy: 778, lt: 1750, p422: 2514, hq: 3771, p4444: 5657, xq: 8485 }
       }
     };
 
@@ -558,13 +562,12 @@
 
     function onFilmTypeChange() {
       const filmType = document.getElementById('film-type').value;
-      const perfoGroup = document.getElementById('perfo-group');
-      perfoGroup.style.display = (filmType === '35mm') ? 'flex' : 'none';
+      document.getElementById('perfo-group').style.display = (filmType === '35mm') ? 'flex' : 'none';
     }
 
     function calculateFramesFromFilm() {
       const filmType = document.getElementById('film-type').value;
-      const perfo = parseInt(document.getElementById('film-perfo')?.value) || 0;
+      const perfo = parseInt(document.getElementById('film-perfo').value, 10) || 0;
       const lengthM = parseFloat(document.getElementById('film-length-m').value) || 0;
 
       let framesPerMeter = 0;
@@ -581,19 +584,46 @@
       return frames;
     }
 
+    function onScanFormatChange() {
+      const format = document.getElementById('scan-format').value;
+      const widthEl = document.getElementById('dpx-width');
+      const heightEl = document.getElementById('dpx-height');
+
+      if (format === 'custom') {
+        widthEl.readOnly = false;
+        heightEl.readOnly = false;
+        widthEl.style.background = '';
+        heightEl.style.background = '';
+        return;
+      }
+
+      const preset = SCAN_FORMATS[format];
+      if (preset) {
+        widthEl.value = preset.width;
+        heightEl.value = preset.height;
+      }
+      widthEl.readOnly = true;
+      heightEl.readOnly = true;
+      widthEl.style.background = '#f4f4f8';
+      heightEl.style.background = '#f4f4f8';
+    }
+
+    function setOverheadPreset() {
+      document.getElementById('dpx-overhead').value = document.getElementById('dpx-overhead-preset').value;
+    }
+
     function calculateDPX() {
       const format = document.getElementById('dpx-format').value;
       const [bitDepth, channels] = format.split('-').map(Number);
-
-      const width = parseInt(document.getElementById('dpx-width').value) || 0;
-      const height = parseInt(document.getElementById('dpx-height').value) || 0;
-      const frames = parseInt(document.getElementById('dpx-frames').value) || 0;
-      const dpxOverhead = parseInt(document.getElementById('dpx-overhead')?.value) || 0;
+      const width = parseInt(document.getElementById('dpx-width').value, 10) || 0;
+      const height = parseInt(document.getElementById('dpx-height').value, 10) || 0;
+      const frames = parseInt(document.getElementById('dpx-frames').value, 10) || 0;
+      const dpxOverhead = parseInt(document.getElementById('dpx-overhead').value, 10) || 0;
 
       let bytesPerPixel = 0;
       if (bitDepth === 10) {
         if (channels === 3) bytesPerPixel = 4;
-        else if (channels === 4) bytesPerPixel = 16 / 3;
+        if (channels === 4) bytesPerPixel = 16 / 3;
       }
       if (bitDepth === 16) {
         bytesPerPixel = channels * 2;
@@ -606,7 +636,6 @@
 
       document.getElementById('dpx-result').textContent =
         sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
-
       document.getElementById('dpx-result-tb').textContent =
         sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
 
@@ -615,18 +644,10 @@
 
     function calculateProRes() {
       const codec = document.getElementById('prores-type').value;
-      const fps = parseInt(document.getElementById('prores-fps')?.value) || 24;
-
-      const width = parseInt(document.getElementById('dpx-width').value) || 0;
-      const height = parseInt(document.getElementById('dpx-height').value) || 0;
-      const frames = parseInt(document.getElementById('dpx-frames').value) || 0;
-
-      const pw = document.getElementById('prores-width');
-      const ph = document.getElementById('prores-height');
-      const pf = document.getElementById('prores-frames');
-      if (pw) pw.value = width;
-      if (ph) ph.value = height;
-      if (pf) pf.value = frames;
+      const fps = parseInt(document.getElementById('prores-fps').value, 10) || 24;
+      const width = parseInt(document.getElementById('dpx-width').value, 10) || 0;
+      const height = parseInt(document.getElementById('dpx-height').value, 10) || 0;
+      const frames = parseInt(document.getElementById('dpx-frames').value, 10) || 0;
 
       const resultEl = document.getElementById('prores-result');
       const tbEl = document.getElementById('prores-result-tb');
@@ -635,11 +656,11 @@
       const durationEl = document.getElementById('prores-duration');
 
       if (width <= 0 || height <= 0 || frames <= 0 || fps <= 0) {
-        if (resultEl) resultEl.textContent = '0.00 MB';
-        if (tbEl) tbEl.textContent = '0.0000 TB';
-        if (rangeEl) rangeEl.textContent = '-';
-        if (targetEl) targetEl.textContent = '0 Mb/s';
-        if (durationEl) durationEl.textContent = '0.00 s';
+        resultEl.textContent = '0.00 MB';
+        tbEl.textContent = '0.0000 TB';
+        rangeEl.textContent = '-';
+        targetEl.textContent = '0 Mb/s';
+        durationEl.textContent = '-';
         return;
       }
 
@@ -658,55 +679,43 @@
       }
 
       const durationSeconds = frames / fps;
-const totalBytes = (bitrateMbps * 1_000_000 / 8) * durationSeconds;
-const lowBytes = totalBytes * 0.9;
-const highBytes = totalBytes * 1.1;
-
-const hours = Math.floor(durationSeconds / 3600);
-const minutes = Math.floor((durationSeconds % 3600) / 60);
-const seconds = Math.floor(durationSeconds % 60);
-
-let durationText = '';
-
-if (hours > 0) {
-  durationText = `${hours}h ${minutes}m`;
-} else {
-  durationText = `${minutes}m ${seconds}s`;
-}
+      const totalBytes = (bitrateMbps * 1_000_000 / 8) * durationSeconds;
+      const lowBytes = totalBytes * 0.9;
+      const highBytes = totalBytes * 1.1;
 
       const sizeMB = totalBytes / 1024 / 1024;
       const sizeTB = totalBytes / 1024 / 1024 / 1024 / 1024;
       const lowTB = lowBytes / 1024 / 1024 / 1024 / 1024;
       const highTB = highBytes / 1024 / 1024 / 1024 / 1024;
 
-      if (resultEl) {
-        resultEl.textContent = sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
-      }
-      if (tbEl) {
-        tbEl.textContent = sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
-      }
-      if (rangeEl) {
-        rangeEl.textContent =
-          lowTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) +
-          ' – ' +
-          highTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) +
-          ' TB';
-      }
-      if (targetEl) {
-        targetEl.textContent =
-          bitrateMbps.toLocaleString('en-US', { maximumFractionDigits: 1 }) +
-          ' Mb/s' +
-          (exactMatch ? ' (Apple table)' : ' (scaled estimate)');
-      }
-      if (durationEl) {
-  durationEl.textContent = durationText;
-}
+      const totalMinutes = durationSeconds / 60;
+      const totalHours = durationSeconds / 3600;
+
+      resultEl.textContent = sizeMB.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MB';
+      tbEl.textContent = sizeTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' TB';
+      rangeEl.textContent =
+        lowTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) +
+        ' – ' +
+        highTB.toLocaleString('en-US', { maximumFractionDigits: 4 }) +
+        ' TB';
+      targetEl.textContent =
+        bitrateMbps.toLocaleString('en-US', { maximumFractionDigits: 1 }) +
+        ' Mb/s' +
+        (exactMatch ? ' (Apple table)' : ' (scaled estimate)');
+      durationEl.textContent =
+        totalMinutes.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' min / ' +
+        totalHours.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' h';
+    }
+
+    function calculateAll() {
+      calculateDPX();
     }
 
     onFilmTypeChange();
+    onScanFormatChange();
+    setOverheadPreset();
     calculateFramesFromFilm();
-    calculateDPX();
-    calculateProRes();
+    calculateAll();
   </script>
 </body>
 </html>
